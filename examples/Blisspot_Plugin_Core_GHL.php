@@ -10,7 +10,10 @@
  */
 
 require_once(APPLICATION_PATH . '/vendor/autoload.php');
+require_once(APPLICATION_PATH_LIB . DS . 'OneSignal' . DS . 'vendor' . DS . 'autoload.php');
 
+use onesignal\client\api\DefaultApi;
+use onesignal\client\Configuration;
 use GuzzleHttp\Client;
 
 class Blisspot_Plugin_Core
@@ -380,12 +383,37 @@ class Blisspot_Plugin_Core
     public function updateOneSignalId($user, $subscriptionId)
     {
         try {
+            $this->log("updateOneSignalId\n");
             if (empty($subscriptionId)) {
-                $this->log("No OneSignal subscription ID\n");
+                $this->log("OneSignal No Subscription\n");
                 return;
             }
 
-            $user->onesignal_id = $subscriptionId;
+            $settingsApi = Engine_Api::_()->getApi('settings', 'core');
+            $appId = $settingsApi->getSetting('core.general.onesignal.app.id');
+            $restApi = $settingsApi->getSetting('core.general.onesignal.rest.api');
+            $orgApiKey = $settingsApi->getSetting('core.general.onesignal.org.api');
+
+            $config = Configuration::getDefaultConfiguration()
+                ->setAppKeyToken($restApi)
+                ->setUserKeyToken($orgApiKey);
+
+            $apiInstance = new DefaultApi(new Client(), $config);
+
+            $aliasResult = $apiInstance->fetchAliases($appId, $subscriptionId);
+            if (empty($aliasResult)) {
+                $this->log("OneSignal No Result\n");
+                return;
+            }
+
+            $identity = $aliasResult->getIdentity();
+            if (empty($identity['onesignal_id'])) {
+                $this->log("OneSignal Identity Not Found\n");
+                return;
+            }
+
+            $oneSignalId = $identity['onesignal_id'];
+            $user->onesignal_id = $oneSignalId;
             $user->save();
 
             return $this->updateContact($user);
