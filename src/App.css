@@ -1,175 +1,88 @@
-.App {
-  text-align: center;
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f3f5f8;
+  color: #1e2430;
 }
 
-.github-corner {
-
-}
-.github-corner svg {
-  height: 80px;
-  width: 80px;
-  fill: #151513;
-  color: #fff;
-  position: absolute;
-  top: 0;
-  border: 0;
-  right: 0;
-  z-index: 99;
-}
-.github-corner:hover .octo-arm {
-  animation: octocat-wave 560ms ease-in-out;
+.app-shell {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px;
 }
 
-.logo-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 20px;
-  z-index: 2;
-}
-.netlify-logo {
-  height: 60px;
-}
-.express-logo {
-  height: 47px;
-  margin-top: 15px;
-}
-.and {
-  font-size: 40px;
-  margin: 0 15px;
-  margin-left: 14px;
-  color: #323233;
+header h1 {
+  margin-bottom: 8px;
 }
 
-.App-header {
-  height: 140px;
-  padding: 20px;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(230deg,#a24bcf,#4b79cf,#4bc5cf);
-  background-size:300% 300%;
-  animation: MoveBG 30s ease infinite;
-  position: relative;
-}
-.App-header:after {
-  content: '';
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  left: 0;
-  top: 0;
-  background: rgba(0, 0, 0, 0.05);
-  z-index: 1;
+header p {
+  margin-top: 0;
+  color: #5d6b82;
 }
 
-.App-title {
-  font-size: 27px;
-  font-weight: 400;
-  font-style: normal;
-  z-index: 2;
-  margin-top: 25px;
+main {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 20px;
+}
+
+.chat-panel,
+.evidence-panel {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 20px rgba(9, 30, 66, 0.08);
+}
+
+.messages {
+  min-height: 340px;
+  max-height: 420px;
+  overflow-y: auto;
+  border: 1px solid #e2e7f0;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.message {
   margin-bottom: 10px;
+  line-height: 1.4;
 }
 
-.App-intro {
-  font-size: large;
-}
-.content {
-  width: 600px;
-  margin: auto;
-}
-.link {
-  position: relative;
-  height: 100%;
-  border: 0px solid rgba(123, 123, 123, 0.498039);
-  border-radius: 4px;
-  color: #999999;
-  line-height: 90px;
-  padding-left: 32px;
-  font-size: 24px;
-  font-weight: 400;
-  background-color: white;
-  box-shadow: rgba(0, 0, 0, 0.2) 0px 1px 2px 0px;
-  margin-bottom: 15px;
-  transition: all .6s cubic-bezier(0.165, 0.84, 0.44, 1);
-  display: block;
-  text-decoration: none;
-}
-.link:after {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  top: 0;
-  left: 0;
-  border-radius: 5px;
-  box-shadow: rgba(0, 0, 0, 0.2) 0px 4px 8px 0px;
-  transition: all .6s cubic-bezier(0.165, 0.84, 0.44, 1);
-  cursor: pointer;
-}
-.link:hover {
-  transform: scale(1.02, 1.02);
-}
-.link:hover:after {
-  opacity: 1;
+.message.user {
+  color: #13337b;
 }
 
-@keyframes MoveBG {
-  0%{
-    background-position:0% 84%
-  }
-  50% {
-    background-position:100% 16%
-  }
-  100% {
-    background-position:0% 84%
-  }
+.composer {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
 }
 
-@keyframes octocat-wave {
-  0%, 100%{
-    transform: rotate(0)
-  }
-  20%, 60%{
-    transform: rotate(-25deg)
-  }
-  40%, 80%{
-    transform: rotate(10deg)
-  }
+.composer input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccd4e0;
 }
 
-
-@media (max-width: 768px) {
-
-  .App-header {
-    height: auto;
-  }
-  .App-title {
-    font-size: 22px;
-  }
-  .logo-wrapper {
-    flex-direction: column;
-    margin-top: 5px;
-  }
-  .and {
-    font-size: 30px;
-  }
-  .github-corner svg {
-    height: 60px;
-    width: 60px;
-  }
+.composer button {
+  border: 0;
+  background: #1d63ea;
+  color: #fff;
+  border-radius: 8px;
+  padding: 0 16px;
 }
 
-@media (max-width:500px) {
-  .github-corner:hover .octo-arm {
-    animation:none
-  }
-  .github-corner .octo-arm {
-    animation:octocat-wave 560ms ease-in-out
+.error {
+  color: #c53030;
+}
+
+.evidence-panel ul {
+  margin-top: 8px;
+}
+
+@media (max-width: 900px) {
+  main {
+    grid-template-columns: 1fr;
   }
 }

@@ -1,10 +1,48 @@
-<h1>Netlify Functions + Express
-<a href="https://app.netlify.com/start/deploy?repository=https://github.com/netlify-labs/netlify-functions-express">
-  <img align="right" src="https://www.netlify.com/img/deploy/button.svg" class="deploy-button" alt="deploy to netlify">
-</a>
-<a href='https://app.netlify.com/sites/express-via-functions/deploys'><img align="right" src='https://api.netlify.com/api/v1/badges/80908bc1-8d73-40f9-bcce-792cd7211146/deploy-status'/></a>
-</h1>
+# Business Copilot MVP (Netlify Functions + React)
 
-Example of using Node.js & [Express](https://expressjs.com/) with [Netlify functions](https://www.netlify.com/docs/functions/) for server side rendered applications.
+This repository now includes a working MVP for an admin AI chat interface that combines:
 
-For more information read the post on [how to run Express.js apps with Netlify Functions](https://www.netlify.com/blog/2018/09/13/how-to-run-express.js-apps-with-netlify-functions/)
+- structured analytics answers (simulated SQL workflow)
+- unstructured retrieval over ingested docs (lightweight RAG)
+- grounded responses with citations, confidence, and checks
+
+## What is implemented
+
+### Frontend
+- Chat UI for admin-style business questions
+- Evidence panel showing citations and quality checks
+- Confidence + trace ID visibility for debugging
+
+### Backend (`/.netlify/functions/ai-chat`)
+- `POST /query` — ask a question and receive grounded response
+- `GET /documents` — list indexed documents
+- `POST /documents` — ingest a new document into retrieval index
+- `GET /health` — service status
+
+## Example questions
+- Which distributor earned the highest revenue last month?
+- Show agent performance trends.
+- Why did returns increase?
+
+## Run locally
+
+```bash
+npm install
+npm start
+```
+
+- React app: `http://localhost:3000`
+- Netlify Functions: `http://localhost:9000`
+
+## Deploy
+
+```bash
+npm run build
+```
+
+Deploy to Netlify using this repo's `netlify.toml` settings.
+
+## Notes
+
+- This is an MVP with in-memory datasets and lightweight retrieval logic for fast iteration.
+- For production hardening, replace the in-memory data with your real SQL warehouse and vector DB.
