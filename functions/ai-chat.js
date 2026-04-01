@@ -2,8 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import bodyParser from 'body-parser'
 import serverless from 'serverless-http'
-
-const aiEngine = require('./ai-engine')
+import fetch from 'isomorphic-fetch'
 
 const app = express()
 const router = express.Router()
@@ -11,38 +10,31 @@ const router = express.Router()
 router.use(cors())
 router.use(bodyParser.json())
 
-router.get('/health', (req, res) => {
-  res.json({ status: 'ok', service: 'ai-chat-mvp' })
-})
+const upstreamBase = process.env.BUSINESS_COPILOT_API || 'http://127.0.0.1:8000'
 
-router.get('/documents', (req, res) => {
-  res.json({ documents: aiEngine.listDocuments() })
-})
+async function proxy(req, res, path, method) {
+  try {
+    const response = await fetch(upstreamBase + path, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: method === 'GET' ? undefined : JSON.stringify(req.body || {})
+    })
 
-router.post('/documents', (req, res) => {
-  if (!req.body || !req.body.content) {
-    return res.status(400).json({ error: 'content is required' })
+    const payload = await response.json()
+    return res.status(response.status).json(payload)
+  } catch (error) {
+    return res.status(502).json({
+      error: 'Python backend unavailable',
+      detail: error.message,
+      hint: 'Start backend with: uvicorn app:app --host 0.0.0.0 --port 8000 (from backend/)'
+    })
   }
+}
 
-  const doc = aiEngine.ingestDocument(req.body)
-  return res.status(201).json({ document: doc })
-})
-
-router.post('/query', (req, res) => {
-  const question = req.body && req.body.question
-
-  if (!question) {
-    return res.status(400).json({ error: 'question is required' })
-  }
-
-  const response = aiEngine.buildResponse(question)
-  return res.json({
-    question,
-    trace_id: 'trace-' + Date.now(),
-    generated_at: new Date().toISOString(),
-    ...response
-  })
-})
+router.get('/health', (req, res) => proxy(req, res, '/health', 'GET'))
+router.get('/documents', (req, res) => proxy(req, res, '/documents', 'GET'))
+router.post('/documents', (req, res) => proxy(req, res, '/documents', 'POST'))
+router.post('/query', (req, res) => proxy(req, res, '/query', 'POST'))
 
 const basePath = process.env.NODE_ENV === 'dev' ? '/ai-chat' : '/.netlify/functions/ai-chat'
 app.use(basePath, router)

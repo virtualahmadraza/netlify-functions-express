@@ -1,48 +1,86 @@
-# Business Copilot MVP (Netlify Functions + React)
+# Business Copilot MVP (Python + OpenAI + FAISS + Netlify UI)
 
-This repository now includes a working MVP for an admin AI chat interface that combines:
+This MVP implements the requested architecture:
 
-- structured analytics answers (simulated SQL workflow)
-- unstructured retrieval over ingested docs (lightweight RAG)
-- grounded responses with citations, confidence, and checks
+- **Python backend** (FastAPI) for orchestration and business logic
+- **OpenAI integration** for SQL generation + grounded response synthesis
+- **Vector database integration** using **FAISS** for semantic document retrieval
+- **Structured + unstructured fusion** with citations, checks, and confidence scoring
+- **Netlify function proxy** + React admin chat interface
 
-## What is implemented
+## Architecture
 
-### Frontend
-- Chat UI for admin-style business questions
-- Evidence panel showing citations and quality checks
-- Confidence + trace ID visibility for debugging
+```text
+React Admin Chat UI
+   -> Netlify Function: /.netlify/functions/ai-chat (proxy)
+      -> FastAPI backend (backend/app.py)
+         -> OpenAI Responses API (LLM + embeddings)
+         -> SQLite analytics tables (SQL path)
+         -> FAISS index over docs (RAG path)
+```
 
-### Backend (`/.netlify/functions/ai-chat`)
-- `POST /query` — ask a question and receive grounded response
-- `GET /documents` — list indexed documents
-- `POST /documents` — ingest a new document into retrieval index
-- `GET /health` — service status
+## Features implemented
 
-## Example questions
-- Which distributor earned the highest revenue last month?
-- Show agent performance trends.
-- Why did returns increase?
+1. **Natural language → SQL**
+   - OpenAI-generated read-only SQL (fallback deterministic SQL if no key)
+   - SQL validation with `sqlglot` (blocks non-SELECT / unsafe statements)
 
-## Run locally
+2. **RAG over document corpus**
+   - Document ingestion endpoint (`POST /documents`)
+   - Embedding generation (OpenAI embedding model or local hash fallback)
+   - FAISS similarity search (`retrieve`)
+
+3. **Response guardrails**
+   - Read-only SQL checks
+   - Evidence-backed answer synthesis
+   - Source attribution (SQL + docs)
+   - Confidence score + validation checks
+
+## API endpoints
+
+### Python backend (`http://localhost:8000`)
+- `GET /health`
+- `GET /documents`
+- `POST /documents`
+- `POST /query`
+
+### Netlify function proxy (`/.netlify/functions/ai-chat`)
+- `GET /health`
+- `GET /documents`
+- `POST /documents`
+- `POST /query`
+
+## Local run
+
+### 1) Python backend
+
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+export OPENAI_API_KEY=your_key_here
+uvicorn app:app --host 0.0.0.0 --port 8000
+```
+
+Optional env vars:
+- `OPENAI_MODEL` (default: `gpt-4.1-mini`)
+- `OPENAI_EMBEDDING_MODEL` (default: `text-embedding-3-small`)
+
+### 2) Netlify + React app
+
+In another terminal:
 
 ```bash
 npm install
 npm start
 ```
 
-- React app: `http://localhost:3000`
-- Netlify Functions: `http://localhost:9000`
+The UI sends requests to `/.netlify/functions/ai-chat/*`, and that function proxies to the Python backend (`BUSINESS_COPILOT_API` default `http://127.0.0.1:8000`).
 
-## Deploy
+## Why this fixes the previous version
 
-```bash
-npm run build
-```
-
-Deploy to Netlify using this repo's `netlify.toml` settings.
-
-## Notes
-
-- This is an MVP with in-memory datasets and lightweight retrieval logic for fast iteration.
-- For production hardening, replace the in-memory data with your real SQL warehouse and vector DB.
+- Uses **Python** as the core AI backend
+- Uses **OpenAI APIs** for generation and embeddings
+- Uses **vector index (FAISS)** for semantic retrieval
+- Implements **multi-step workflow**: SQL generation/validation/execution + RAG retrieval + grounded synthesis + checks
